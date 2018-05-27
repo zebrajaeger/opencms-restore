@@ -8,12 +8,16 @@ copy default.properties to local.properties
 
 change settings für db,user and password 
 
-## dump DB
-    mvn compile -Pdump-db 
+## backup OpenCMS
+ (dump DB, copy config files)
+    mvn compile -Pbackup 
     
-## drop, create and restore DB
-    mvn compile -Pdrop-create-and-restore
+## restore OpenCMS 
+(drop, create and restore DB, copy config files)
+    mvn compile -Prestore
+## remove dump data
+    mvn compile -Pdelete
     
 ## handle multible dumps
-change  
+change  'dump.id' in local.config or add -Ddump.id=... to commandline
     

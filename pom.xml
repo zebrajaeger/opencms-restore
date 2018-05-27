@@ -10,6 +10,10 @@
     <properties>
         <root>${project.basedir}</root>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <file.local.dump>${data.dir}/${dump.id}.dbdump.sql</file.local.dump>
+        <file.local.opencms-module-config>${data.dir}/${dump.id}.opencms-modules.xml</file.local.opencms-module-config>
+        <file.remote.opencms-module-config>${oc.webapp.path}/WEB-INF/config/opencms-modules.xml</file.remote.opencms-module-config>
     </properties>
 
     <build>
@@ -59,9 +63,9 @@
                             <dump.id>${dump.id}</dump.id>
                             <oc.webapp.path>${oc.webapp.path}</oc.webapp.path>
 
-                            <file.local.dump>${data.dir}/${dump.id}.dbdump.sql</file.local.dump>
-                            <file.local.opencms-module-config>${data.dir}/${dump.id}.opencms-modules.xml</file.local.opencms-module-config>
-                            <file.remote.opencms-module-config>${oc.webapp.path}/WEB-INF/config/opencms-modules.xml</file.remote.opencms-module-config>
+                            <file.local.dump>${file.local.dump}</file.local.dump>
+                            <file.local.opencms-module-config>${file.local.opencms-module-config}</file.local.opencms-module-config>
+                            <file.remote.opencms-module-config>${file.remote.opencms-module-config}</file.remote.opencms-module-config>
                         </properties>
                     </configuration>
                 </plugin>
@@ -345,9 +349,40 @@
         </profile>
 
         <profile>
-            <id>drop-create-and-restore</id>
+            <id>restore</id>
             <build>
                 <plugins>
+                    <!-- copy config -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>remove config file</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo>move '${file.remote.opencms-module-config}' to '${file.remote.opencms-module-config}.bck'</echo>
+                                        <move file="${file.remote.opencms-module-config}"
+                                              tofile="${file.remote.opencms-module-config}.bck"
+                                              overwrite="true"
+                                              failonerror="false"
+                                        />
+                                        <echo>copy '${file.local.opencms-module-config}' to '${file.remote.opencms-module-config}'</echo>
+                                        <copy file="${file.local.opencms-module-config}"
+                                              tofile="${file.remote.opencms-module-config}"
+                                              overwrite="true"
+                                        />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- copy db -->
                     <plugin>
                         <artifactId>maven-invoker-plugin</artifactId>
                         <executions>
@@ -424,6 +459,87 @@
                                     <profiles>
                                         <profile>restore-db</profile>
                                     </profiles>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>backup</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>remove config file</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo>copy '${file.remote.opencms-module-config}' to '${file.local.opencms-module-config}'</echo>
+                                        <echo>remote: ${file.remote.opencms-module-config}</echo>
+                                        <copy file="${file.remote.opencms-module-config}"
+                                              tofile="${file.local.opencms-module-config}"
+                                              overwrite="false"
+                                        />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>restore-db</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <goals>
+                                        <goal>compile</goal>
+                                    </goals>
+                                    <profiles>
+                                        <profile>dump-db</profile>
+                                    </profiles>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>delete</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>remove config file</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo>delete '${file.local.opencms-module-config}'</echo>
+                                        <delete file="${file.local.opencms-module-config}"/>
+                                        <echo>delete '${file.local.dump}'</echo>
+                                        <delete file="${file.local.dump}"/>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
