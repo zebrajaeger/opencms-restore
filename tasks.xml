@@ -169,7 +169,7 @@
                                 <argument>-d</argument>
                                 <argument>${oc.db.name}</argument>
                                 <argument>-f</argument>
-                                <argument>${file}</argument>
+                                <argument>${file.local.dump}</argument>
                             </arguments>
                         </configuration>
                     </plugin>
@@ -201,7 +201,7 @@
                                 <argument>--host=localhost</argument>
                                 <argument>--username=${db.user}</argument>
                                 <argument>-f</argument>
-                                <argument>${file}</argument>
+                                <argument>${file.local.dump}</argument>
                                 <argument>${oc.db.name}</argument>
                             </arguments>
                         </configuration>

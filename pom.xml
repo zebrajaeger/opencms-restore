@@ -12,9 +12,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencies>
-    </dependencies>
-
     <build>
         <pluginManagement>
             <plugins>
@@ -36,6 +33,13 @@
                     <version>1.0.0</version>
                 </plugin>
 
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.8</version>
+                </plugin>
+
                 <plugin>
                     <artifactId>maven-invoker-plugin</artifactId>
                     <version>3.0.1</version>
@@ -46,11 +50,18 @@
                         <showErrors>true</showErrors>
                         <properties>
                             <root>${root}</root>
-                            <file>${file}</file>
+
                             <db.user>${db.user}</db.user>
                             <oc.db.user>${oc.db.user}</oc.db.user>
                             <oc.db.password>${oc.db.password}</oc.db.password>
                             <oc.db.name>${oc.db.name}</oc.db.name>
+
+                            <dump.id>${dump.id}</dump.id>
+                            <oc.webapp.path>${oc.webapp.path}</oc.webapp.path>
+
+                            <file.local.dump>${data.dir}/${dump.id}.dbdump.sql</file.local.dump>
+                            <file.local.opencms-module-config>${data.dir}/${dump.id}.opencms-modules.xml</file.local.opencms-module-config>
+                            <file.remote.opencms-module-config>${oc.webapp.path}/WEB-INF/config/opencms-modules.xml</file.remote.opencms-module-config>
                         </properties>
                     </configuration>
                 </plugin>
@@ -101,6 +112,25 @@
                                 <file>${root}/default.properties</file>
                                 <file>${root}/local.properties</file>
                             </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- create data dir if not exist -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${data.dir}"/>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
